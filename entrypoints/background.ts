@@ -22,8 +22,18 @@ export default defineBackground(() => {
 
     browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         if (message.type === 'CONVERT_TEXT') {
+            const allowedModes = ['normal', 'spaced', 'okurigana', 'furigana'];
+            const allowedTargets = ['hiragana', 'katakana', 'romaji'];
+            const allowedRomajiSystems = ['hepburn', 'nippon', 'passport'];
+            const mode = allowedModes.includes(message.mode) ? message.mode : 'furigana';
+            const to = allowedTargets.includes(message.to) ? message.to : 'romaji';
+            const romajiSystem = allowedRomajiSystems.includes(message.romajiSystem)
+                ? message.romajiSystem
+                : 'hepburn';
+            const delimiter_start = typeof message.delimiter_start === 'string' ? message.delimiter_start : '(';
+            const delimiter_end = typeof message.delimiter_end === 'string' ? message.delimiter_end : ')';
             getKuroshiro().then(async (instance) => {
-                const result = await instance.convert(message.text, { to: message.to, mode: 'furigana' });
+                const result = await instance.convert(message.text, { to, mode, romajiSystem, delimiter_start, delimiter_end });
                 sendResponse({ result });
             }).catch((err) => {
                 console.error('Kuroshiro background error:', err);
