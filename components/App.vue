@@ -3,6 +3,7 @@ import {useIntervalFn, useMutationObserver} from '@vueuse/core';
 import PlayerOverlay from "@/components/PlayerOverlay.vue";
 import Kuroshiro from "kuroshiro";
 import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji";
+import { browser } from 'wxt/browser';
 
 const useQuerySelector = (selector: string) => {
     const elementRef = ref<HTMLElement | null>();
@@ -26,18 +27,21 @@ async function updateCaptions() {
         line.value = '';
         return;
     }
-    // containerRef.value!.style.display = 'none';
+    containerRef.value!.style.display = 'none';
 
     const text = containerRef!.value!.innerText;
 
-    const kuroshiro = new Kuroshiro();
-    await kuroshiro.init(new KuromojiAnalyzer({ dictPath: 'dict/' }));
-
-    const result = await kuroshiro.convert(text, {
-        to: "hiragana"
-    });
-
-    line.value = result;
+    try {
+        const response = await browser.runtime.sendMessage({
+            type: 'CONVERT_TEXT',
+            text,
+            to: 'romaji',
+        });
+        line.value = response?.result || '';
+        // console.log(response);
+    } catch (err) {
+        console.error('Failed to send conversion request:', err);
+    }
 }
 
 useMutationObserver(containerRef, (mutations) => {

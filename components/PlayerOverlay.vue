@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const slop = defineSlots<{
+defineSlots<{
     default(): any
 }>();
 </script>
@@ -15,23 +15,30 @@ const slop = defineSlots<{
 <style scoped>
 .cool-captions {
     pointer-events: none;
-
     position: absolute;
-    top: 0;
-    left: 0;
-
-    width: 100%;
-    height: 100%;
+    inset: 0;
 
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
+    padding-bottom: 32px;
+
+    padding-left: 24px;
+    padding-right: 24px;
+    box-sizing: border-box;
 }
+
 .captions-text {
-    padding: 4px;
-    background-color: #212121;
+    padding: 6px 12px;
+    background-color: rgba(33, 33, 33, 0.85);
+    border-radius: 4px;
 
     color: white;
     font-size: 2em;
+    text-align: center;
+
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
 }
 </style>
