@@ -11,6 +11,15 @@ importers:
       '@vueuse/core':
         specifier: ^15.0.0
         version: 15.0.0(vue@3.5.44(typescript@5.9.3))
+      kuromoji:
+        specifier: ^0.1.2
+        version: 0.1.2
+      kuroshiro:
+        specifier: 2.0.0-beta.3
+        version: 2.0.0-beta.3
+      kuroshiro-analyzer-kuromoji:
+        specifier: 2.0.0-beta.3
+        version: 2.0.0-beta.3
       vue:
         specifier: ^3.5.29
         version: 3.5.44(typescript@5.9.3)
@@ -484,6 +493,9 @@ packages:
     resolution: {integrity: sha512-1OvF9IbWwaeiM9VhzYXVQacMibxpXOMYVNIvMtKRyX9SImBXpKcFr8XvFDeEslCyuH/t6KRt7HEO94AlP8Iatw==}
     engines: {node: '>=12'}
 
+  async@2.6.4:
+    resolution: {integrity: sha512-mzo5dfJYwAn29PeiJ0zvwTo04zj8HDJj0Mn8TD7sno7q12prdbnasKJHhkm2c1LgrhlJ0teaea8860oxi51mGA==}
+
   async@3.2.6:
     resolution: {integrity: sha512-htCUDlxyyCLMgaM3xXg0C0LW2xqfuQ6p05pCEIsXuyQ+a1koYKTuBMzRNwmybfLgvJDMd0r1LTn4+E0Ti6C2AA==}
 
@@ -763,6 +775,9 @@ packages:
   dotenv@17.4.2:
     resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
     engines: {node: '>=12'}
+
+  doublearray@0.0.2:
+    resolution: {integrity: sha512-aw55FtZzT6AmiamEj2kvmR6BuFqvYgKZUkfQ7teqVRNqD5UE0rw8IeW/3gieHNKQ5sPuDKlljWEn4bzv5+1bHw==}
 
   ecdsa-sig-formatter@1.0.11:
     resolution: {integrity: sha512-nagl3RYrbNv6kQkeJIpt6NJZy8twLB/2vtz6yN9Z4vRKHN4/QZJIEbqohALSgwKdnksuY3k5Addp5lg8sVoVcQ==}
@@ -1163,6 +1178,17 @@ packages:
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
+  kuromoji@0.1.2:
+    resolution: {integrity: sha512-V0dUf+C2LpcPEXhoHLMAop/bOht16Dyr+mDiIE39yX3vqau7p80De/koFqpiTcL1zzdZlc3xuHZ8u5gjYRfFaQ==}
+
+  kuroshiro-analyzer-kuromoji@2.0.0-beta.3:
+    resolution: {integrity: sha512-qFETWfCzkqEDXPCZ1XLdfF3i6It/gFKuIxCc5vmepXWVRKFwWO0SYUVENttgd7S93Yzg3etBgHC86sIdpluS+Q==}
+    engines: {node: '>=22'}
+
+  kuroshiro@2.0.0-beta.3:
+    resolution: {integrity: sha512-h77dbizyRgLIRMqf7hC5jfMA+WD+ocVt2KFGxINEpUG5plO5leMZcygsxwhCkEDciLHulQki1bUw9ubprg2GkA==}
+    engines: {node: '>=22'}
+
   ky@1.14.3:
     resolution: {integrity: sha512-9zy9lkjac+TR1c2tG+mkNSVlyOpInnWdSMiue4F+kq8TwJSgv6o8jhLRg8Ho6SnZ9wOYUq/yozts9qQCfk7bIw==}
     engines: {node: '>=18'}
@@ -1295,6 +1321,9 @@ packages:
 
   lodash.once@4.1.1:
     resolution: {integrity: sha512-Sb487aTOCr9drQVL8pIxOzVhafOjZN9UU54hiN8PU3uAiSV7lx1yYNpbNmex2PK6dSJoNTSJUUswT651yww3Mg==}
+
+  lodash@4.18.1:
+    resolution: {integrity: sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==}
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
@@ -1993,6 +2022,9 @@ packages:
   zip-dir@2.0.0:
     resolution: {integrity: sha512-uhlsJZWz26FLYXOD6WVuq+fIcZ3aBPGo/cFdiLlv3KNwpa52IF3ISV8fLhQLiqVu5No3VhlqlgthN6gehil1Dg==}
 
+  zlibjs@0.3.1:
+    resolution: {integrity: sha512-+J9RrgTKOmlxFSDHo0pI1xM6BLVUv+o0ZT9ANtCxGkjIVCCUdx9alUF8Gm+dGLKbkkkidWIHFDZHDMpfITt4+w==}
+
 snapshots:
 
   '@1natsu/wait-element@5.0.0':
@@ -2437,6 +2469,10 @@ snapshots:
 
   array-union@3.0.1: {}
 
+  async@2.6.4:
+    dependencies:
+      lodash: 4.18.1
+
   async@3.2.6: {}
 
   atomic-sleep@1.0.0: {}
@@ -2716,6 +2752,8 @@ snapshots:
       type-fest: 4.41.0
 
   dotenv@17.4.2: {}
+
+  doublearray@0.0.2: {}
 
   ecdsa-sig-formatter@1.0.11:
     dependencies:
@@ -3077,6 +3115,18 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
+  kuromoji@0.1.2:
+    dependencies:
+      async: 2.6.4
+      doublearray: 0.0.2
+      zlibjs: 0.3.1
+
+  kuroshiro-analyzer-kuromoji@2.0.0-beta.3:
+    dependencies:
+      kuromoji: 0.1.2
+
+  kuroshiro@2.0.0-beta.3: {}
+
   ky@1.14.3: {}
 
   latest-version@9.0.0:
@@ -3181,6 +3231,8 @@ snapshots:
   lodash.merge@4.6.2: {}
 
   lodash.once@4.1.1: {}
+
+  lodash@4.18.1: {}
 
   magic-string@0.30.21:
     dependencies:
@@ -3894,3 +3946,5 @@ snapshots:
     dependencies:
       async: 3.2.6
       jszip: 3.10.2
+
+  zlibjs@0.3.1: {}
