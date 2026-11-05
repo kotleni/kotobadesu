@@ -23,7 +23,7 @@ export default defineBackground(() => {
     browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         if (message.type === 'CONVERT_TEXT') {
             getKuroshiro().then(async (instance) => {
-                const result = await instance.convert(message.text, { to: message.to });
+                const result = await instance.convert(message.text, { to: message.to, mode: 'furigana' });
                 sendResponse({ result });
             }).catch((err) => {
                 console.error('Kuroshiro background error:', err);

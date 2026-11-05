@@ -60,7 +60,7 @@ onMounted(() => updateCaptions());
 <template>
     <teleport :to="playerContainerRef" v-if="playerContainerRef">
         <PlayerOverlay v-if="line.length > 0">
-            {{ line }}
+            <span class="furigana-container" v-html="line"></span>
         </PlayerOverlay>
     </teleport>
 </template>
