@@ -14,6 +14,8 @@ export interface RomajiSettings {
   delimiterEnd: string;
   /** Overlay position inside the player. */
   position: CaptionPosition;
+  /** Enable click-to-lookup for caption characters. */
+  lookupEnabled: boolean;
 }
 
 export const DEFAULT_SETTINGS: RomajiSettings = {
@@ -23,6 +25,7 @@ export const DEFAULT_SETTINGS: RomajiSettings = {
   delimiterStart: '(',
   delimiterEnd: ')',
   position: 'bottom',
+  lookupEnabled: true,
 };
 
 const STORAGE_KEY = 'romajiSettings';
@@ -66,6 +69,7 @@ function sanitize(raw: unknown): RomajiSettings {
     delimiterStart: typeof r.delimiterStart === 'string' ? r.delimiterStart.slice(0, 10) : base.delimiterStart,
     delimiterEnd: typeof r.delimiterEnd === 'string' ? r.delimiterEnd.slice(0, 10) : base.delimiterEnd,
     position: r.position === 'top' ? 'top' : 'bottom',
+    lookupEnabled: typeof r.lookupEnabled === 'boolean' ? r.lookupEnabled : base.lookupEnabled,
   };
 }
 

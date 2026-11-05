@@ -216,6 +216,28 @@ onBeforeUnmount(close);
           </button>
         </div>
       </div>
+
+      <div class="rt-setting">
+        <span class="rt-setting-label">Lookup</span>
+        <div class="rt-segmented">
+          <button
+            type="button"
+            class="rt-segmented-btn"
+            :class="{ active: settings.lookupEnabled === true }"
+            @click="settings.lookupEnabled = true"
+          >
+            On
+          </button>
+          <button
+            type="button"
+            class="rt-segmented-btn"
+            :class="{ active: settings.lookupEnabled === false }"
+            @click="settings.lookupEnabled = false"
+          >
+            Off
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>

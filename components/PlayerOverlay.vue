@@ -4,9 +4,28 @@ import type { CaptionPosition } from '@/composables/useSettings';
 withDefaults(
   defineProps<{
     position?: CaptionPosition;
+    lookupEnabled?: boolean;
   }>(),
-  { position: 'bottom' },
+  { position: 'bottom', lookupEnabled: false },
 );
+
+const emit = defineEmits<{
+  (e: 'caption-click', ev: MouseEvent): void;
+  (e: 'caption-hover', ev: MouseEvent): void;
+  (e: 'caption-leave'): void;
+}>();
+
+const onClick = (ev: MouseEvent) => {
+  emit('caption-click', ev);
+};
+
+const onHover = (ev: MouseEvent) => {
+  emit('caption-hover', ev);
+};
+
+const onLeave = () => {
+  emit('caption-leave');
+};
 
 defineSlots<{
     default(): any
@@ -14,7 +33,13 @@ defineSlots<{
 </script>
 
 <template>
-    <div class="cool-captions" :class="{ 'is-top': position === 'top', 'is-bottom': position === 'bottom' }">
+    <div
+        class="cool-captions"
+        :class="{ 'is-top': position === 'top', 'is-bottom': position === 'bottom', 'is-interactive': lookupEnabled }"
+        @click="onClick"
+        @mousemove="onHover"
+        @mouseleave="onLeave"
+    >
         <div class="captions-text">
             <slot></slot>
         </div>
@@ -63,6 +88,12 @@ defineSlots<{
     max-width: 100%;
 }
 
+.cool-captions.is-interactive .captions-text {
+    pointer-events: auto;
+    cursor: pointer;
+    user-select: none;
+}
+
 .captions-text ruby {
     ruby-position: over;
 }
@@ -70,5 +101,14 @@ defineSlots<{
 .captions-text rt {
     font-size: 0.5em;
     color: rgba(255, 255, 255, 0.85);
+}
+
+.captions-text :deep(.rt-selected) {
+    background: rgba(62, 166, 255, 0.85);
+    color: #fff;
+    border-radius: 4px;
+    padding: 0 2px;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
 }
 </style>
