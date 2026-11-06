@@ -5,7 +5,7 @@ import SettingsDrawer from "@/components/SettingsDrawer.vue";
 import LookupModal, { type LookupResult } from "@/components/LookupModal.vue";
 import { browser } from 'wxt/browser';
 import { getConvertOptions, isHtmlOutput, useSettings } from '@/composables/useSettings';
-import { computed, watch } from 'vue';
+import { computed, nextTick, watch } from 'vue';
 
 const { settings, isLoaded } = useSettings();
 
@@ -30,7 +30,6 @@ const htmlMode = computed(() => isHtmlOutput(getConvertOptions(settings.value).m
 
 const lookup = ref<LookupResult | null>(null);
 const lookupLoading = ref(false);
-const hoverBox = ref<{ left: number; top: number; width: number; height: number } | null>(null);
 
 async function updateCaptions() {
     if (!containerRef.value) {
@@ -80,101 +79,80 @@ useMutationObserver(containerRef, (mutations) => {
 
 onMounted(() => updateCaptions());
 
-// Re-convert the current caption whenever display settings change.
-watch(settings, () => {
-    if (isLoaded.value) void convertText(rawText.value.trim());
-}, { deep: true });
+// Only conversion-relevant settings need a re-convert; position/font/bg don't.
+watch(
+    () => JSON.stringify(getConvertOptions(settings.value)),
+    () => {
+        if (isLoaded.value) void convertText(rawText.value.trim());
+    },
+);
 
-// Close lookup if the feature is turned off while open.
-watch(() => settings.value.lookupEnabled, (enabled) => {
-    if (!enabled) {
-        lookup.value = null;
-        hoverBox.value = null;
-    }
-});
-
-watch(line, () => {
-    hoverBox.value = null;
-});
-
-function clearHighlights() {
-    document.querySelectorAll('.rt-selected').forEach((el) => {
-        const parent = el.parentNode;
-        if (!parent) return;
-        const text = document.createTextNode(el.textContent || '');
-        parent.replaceChild(text, el);
-        parent.normalize();
-    });
+function clearSelection() {
+    document.querySelectorAll('.rt-char.rt-selected').forEach((el) => el.classList.remove('rt-selected'));
 }
 
-function getCaretRange(x: number, y: number): Range | null {
-    return (document as Document & { caretRangeFromPoint?: (x: number, y: number) => Range | null }).caretRangeFromPoint?.(x, y) ?? null;
+function clearHover() {
+    document.querySelectorAll('.rt-char.rt-hover').forEach((el) => el.classList.remove('rt-hover'));
+}
+
+function wrapCaptionChars() {
+    const container = playerContainerRef.value?.querySelector('.furigana-container') as HTMLElement | null;
+    if (!container) return;
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
+        acceptNode(node) {
+            if (node.parentElement?.closest('rt, rp, .rt-char')) return NodeFilter.FILTER_REJECT;
+            if (!node.textContent) return NodeFilter.FILTER_REJECT;
+            return NodeFilter.FILTER_ACCEPT;
+        },
+    });
+    const textNodes: Text[] = [];
+    while (walker.nextNode()) textNodes.push(walker.currentNode as Text);
+    for (const tn of textNodes) {
+        const text = tn.textContent || '';
+        if (!text) continue;
+        const frag = document.createDocumentFragment();
+        for (const ch of text) {
+            const span = document.createElement('span');
+            span.className = ch === ' ' ? 'rt-char rt-char-space' : 'rt-char';
+            span.dataset.char = ch;
+            span.textContent = ch === ' ' ? '\u00A0' : ch;
+            frag.appendChild(span);
+        }
+        tn.parentNode?.replaceChild(frag, tn);
+    }
+}
+
+watch(line, async () => {
+    clearHover();
+    await nextTick();
+    wrapCaptionChars();
+});
+
+function getCharSpan(ev: MouseEvent): HTMLElement | null {
+    if (!(ev.target instanceof HTMLElement)) return null;
+    return ev.target.closest('.rt-char') as HTMLElement | null;
 }
 
 function onCaptionHover(ev: MouseEvent) {
-    if (!settings.value.lookupEnabled) {
-        hoverBox.value = null;
-        return;
-    }
-    const range = getCaretRange(ev.clientX, ev.clientY);
-    if (!range) {
-        hoverBox.value = null;
-        return;
-    }
-    const node = range.startContainer;
-    if (node.nodeType !== 3) {
-        hoverBox.value = null;
-        return;
-    }
-    const parentEl = node.parentElement;
-    // The clicked character already has a persistent highlight — don't stack another.
-    if (parentEl?.closest('.rt-selected')) {
-        hoverBox.value = null;
-        return;
-    }
-    const rect = range.getBoundingClientRect();
-    if (!rect.width || !rect.height) {
-        hoverBox.value = null;
-        return;
-    }
-    const playerRect = playerContainerRef.value?.getBoundingClientRect();
-    if (!playerRect) return;
-    hoverBox.value = {
-        left: rect.left - playerRect.left,
-        top: rect.top - playerRect.top,
-        width: rect.width,
-        height: rect.height,
-    };
+    const span = getCharSpan(ev);
+    clearHover();
+    if (!span || span.classList.contains('rt-selected') || span.classList.contains('rt-char-space')) return;
+    span.classList.add('rt-hover');
 }
 
 function onCaptionLeave() {
-    hoverBox.value = null;
+    clearHover();
 }
 
 async function onCaptionClick(ev: MouseEvent) {
-    if (!settings.value.lookupEnabled) return;
-    clearHighlights();
-    hoverBox.value = null;
+    const span = getCharSpan(ev);
+    if (!span || span.classList.contains('rt-char-space')) return;
 
-    const range = getCaretRange(ev.clientX, ev.clientY);
-    if (!range) return;
+    clearSelection();
+    span.classList.add('rt-selected');
 
-    const node = range.startContainer as CharacterData | null;
-    if (!node || node.nodeType !== 3) return;
-    const offset = range.startOffset;
-    const text = node.textContent || '';
-    if (offset >= text.length) return;
-
-    const char = text[offset] ?? '';
-    // Highlight the single character in place.
-    const before = text.slice(0, offset);
-    const after = text.slice(offset + 1);
-    node.textContent = before;
-    const mark = document.createElement('mark');
-    mark.className = 'rt-selected';
-    mark.textContent = char;
-    node.after(mark);
-    if (after) mark.after(document.createTextNode(after));
+    const char = span.dataset.char ?? span.textContent ?? '';
+    if (!char) return;
 
     lookupLoading.value = true;
     lookup.value = { char, type: '…' } as LookupResult;
@@ -195,7 +173,7 @@ async function onCaptionClick(ev: MouseEvent) {
 
 const closeLookup = () => {
     lookup.value = null;
-    clearHighlights();
+    clearSelection();
 };
 </script>
 
@@ -204,7 +182,8 @@ const closeLookup = () => {
         <PlayerOverlay
             v-if="line.length > 0"
             :position="settings.position"
-            :lookup-enabled="settings.lookupEnabled"
+            :font-size="settings.fontSize"
+            :bg-opacity="settings.bgOpacity"
             @caption-click="onCaptionClick"
             @caption-hover="onCaptionHover"
             @caption-leave="onCaptionLeave"
@@ -212,33 +191,15 @@ const closeLookup = () => {
             <span v-if="htmlMode" class="furigana-container" v-html="line"></span>
             <span v-else class="furigana-container">{{ line }}</span>
         </PlayerOverlay>
-        <div
-            v-if="hoverBox"
-            class="rt-hover-box"
-            :style="{
-                left: hoverBox.left + 'px',
-                top: hoverBox.top + 'px',
-                width: hoverBox.width + 'px',
-                height: hoverBox.height + 'px',
-            }"
-        ></div>
         <SettingsDrawer />
         <LookupModal
             v-if="lookup"
             :lookup="lookup"
             :loading="lookupLoading"
             :position="settings.position"
+            :font-size="settings.fontSize"
+            :bg-opacity="settings.bgOpacity"
             @close="closeLookup"
         />
     </teleport>
 </template>
-
-<style scoped>
-.rt-hover-box {
-    position: absolute;
-    pointer-events: none;
-    background: rgba(62, 166, 255, 0.45);
-    border-radius: 4px;
-    z-index: 10;
-}
-</style>

@@ -14,8 +14,10 @@ export interface RomajiSettings {
   delimiterEnd: string;
   /** Overlay position inside the player. */
   position: CaptionPosition;
-  /** Enable click-to-lookup for caption characters. */
-  lookupEnabled: boolean;
+  /** Caption font size in px. */
+  fontSize: number;
+  /** Caption background opacity 0-1. */
+  bgOpacity: number;
 }
 
 export const DEFAULT_SETTINGS: RomajiSettings = {
@@ -25,7 +27,8 @@ export const DEFAULT_SETTINGS: RomajiSettings = {
   delimiterStart: '(',
   delimiterEnd: ')',
   position: 'bottom',
-  lookupEnabled: true,
+  fontSize: 32,
+  bgOpacity: 0.85,
 };
 
 const STORAGE_KEY = 'romajiSettings';
@@ -36,10 +39,18 @@ const settings = ref<RomajiSettings>({ ...DEFAULT_SETTINGS });
 const isLoaded = ref(false);
 
 let initPromise: Promise<void> | null = null;
+let saveTimer: ReturnType<typeof setTimeout> | null = null;
+let lastSavedJson: string | null = null;
 
 const TARGETS: KuroshiroTarget[] = ['hiragana', 'katakana', 'romaji'];
 const MODES: KuroshiroMode[] = ['normal', 'spaced', 'okurigana', 'furigana'];
 const ROMAJI_SYSTEMS: RomajiSystem[] = ['hepburn', 'nippon', 'passport'];
+
+function clampNumber(v: unknown, min: number, max: number, fallback: number): number {
+  const n = typeof v === 'number' ? v : Number(v);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(max, Math.max(min, n));
+}
 
 function sanitize(raw: unknown): RomajiSettings {
   const base = { ...DEFAULT_SETTINGS };
@@ -69,7 +80,8 @@ function sanitize(raw: unknown): RomajiSettings {
     delimiterStart: typeof r.delimiterStart === 'string' ? r.delimiterStart.slice(0, 10) : base.delimiterStart,
     delimiterEnd: typeof r.delimiterEnd === 'string' ? r.delimiterEnd.slice(0, 10) : base.delimiterEnd,
     position: r.position === 'top' ? 'top' : 'bottom',
-    lookupEnabled: typeof r.lookupEnabled === 'boolean' ? r.lookupEnabled : base.lookupEnabled,
+    fontSize: clampNumber(r.fontSize, 16, 64, base.fontSize),
+    bgOpacity: clampNumber(r.bgOpacity, 0, 1, base.bgOpacity),
   };
 }
 
@@ -98,6 +110,7 @@ async function loadFromStorage(): Promise<void> {
 }
 
 async function saveToStorage(snapshot: RomajiSettings): Promise<void> {
+  lastSavedJson = JSON.stringify(snapshot);
   // Always write both back-ends so the settings survive even if one becomes unavailable.
   try {
     await browser.storage.local.set({ [STORAGE_KEY]: snapshot });
@@ -116,11 +129,18 @@ function ensureInit(): Promise<void> {
 
   initPromise = (async () => {
     // Persist every change (deep) once the initial load has completed.
+    // Debounced so dragging a slider coalesces into a single write instead
+    // of a stream of stale echoes that make the slider flash back and forth.
     watch(
       settings,
-      (next) => {
+      () => {
         if (!isLoaded.value) return;
-        void saveToStorage(JSON.parse(JSON.stringify(next)) as RomajiSettings);
+        if (saveTimer) clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => {
+          saveTimer = null;
+          const snapshot = JSON.parse(JSON.stringify(settings.value)) as RomajiSettings;
+          void saveToStorage(snapshot);
+        }, 300);
       },
       { deep: true },
     );
@@ -130,8 +150,10 @@ function ensureInit(): Promise<void> {
       const onChanged = (changes: Record<string, { newValue?: unknown }>, area: string) => {
         if (area !== 'local' || !changes[STORAGE_KEY]?.newValue) return;
         const next = sanitize(changes[STORAGE_KEY].newValue);
-        // Avoid echoing our own save straight back into the store.
-        if (JSON.stringify(next) === JSON.stringify(settings.value)) return;
+        const nextJson = JSON.stringify(next);
+        // Ignore echoes of our own writes (including stale ones from mid-drag).
+        if (nextJson === lastSavedJson) return;
+        if (nextJson === JSON.stringify(settings.value)) return;
         settings.value = next;
       };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

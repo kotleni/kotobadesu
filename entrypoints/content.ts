@@ -1,7 +1,7 @@
 import App from "@/components/App.vue";
 
 function removeStaleUi() {
-    document.querySelectorAll('.cool-captions, .rt-settings, .rt-lookup-overlay, .rt-hover-box').forEach((el) => el.remove());
+    document.querySelectorAll('.cool-captions, .rt-settings, .rt-lookup-overlay').forEach((el) => el.remove());
     document.querySelectorAll('.rt-ui-wrapper').forEach((el) => el.remove());
 }
 
@@ -28,7 +28,7 @@ export default defineContentScript({
                 app?.unmount();
                 // Teleported nodes live outside the wrapper, so explicitly
                 // drop any the unmount may have left behind.
-                document.querySelectorAll('.cool-captions, .rt-settings, .rt-lookup-modal').forEach((el) => el.remove());
+                document.querySelectorAll('.cool-captions, .rt-settings, .rt-lookup-overlay').forEach((el) => el.remove());
             },
         });
         ui.autoMount();

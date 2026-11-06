@@ -4,9 +4,10 @@ import type { CaptionPosition } from '@/composables/useSettings';
 withDefaults(
   defineProps<{
     position?: CaptionPosition;
-    lookupEnabled?: boolean;
+    fontSize?: number;
+    bgOpacity?: number;
   }>(),
-  { position: 'bottom', lookupEnabled: false },
+  { position: 'bottom', fontSize: 32, bgOpacity: 0.85 },
 );
 
 const emit = defineEmits<{
@@ -35,12 +36,15 @@ defineSlots<{
 <template>
     <div
         class="cool-captions"
-        :class="{ 'is-top': position === 'top', 'is-bottom': position === 'bottom', 'is-interactive': lookupEnabled }"
+        :class="{ 'is-top': position === 'top', 'is-bottom': position === 'bottom', 'is-interactive': true }"
         @click="onClick"
         @mousemove="onHover"
         @mouseleave="onLeave"
     >
-        <div class="captions-text">
+        <div
+            class="captions-text"
+            :style="{ fontSize: fontSize + 'px', backgroundColor: `rgba(33,33,33,${bgOpacity})` }"
+        >
             <slot></slot>
         </div>
     </div>
@@ -76,11 +80,9 @@ defineSlots<{
 
 .captions-text {
     padding: 6px 12px;
-    background-color: rgba(33, 33, 33, 0.85);
     border-radius: 4px;
 
     color: white;
-    font-size: 2em;
     text-align: center;
 
     word-break: break-word;
@@ -103,12 +105,17 @@ defineSlots<{
     color: rgba(255, 255, 255, 0.85);
 }
 
-.captions-text :deep(.rt-selected) {
+.captions-text :deep(.rt-char) {
+    border-radius: 2px;
+}
+
+.captions-text :deep(.rt-char.rt-hover) {
+    background: rgba(62, 166, 255, 0.30);
+    box-shadow: 0 0 0 2px rgba(62, 166, 255, 0.12);
+}
+
+.captions-text :deep(.rt-char.rt-selected) {
     background: rgba(62, 166, 255, 0.85);
-    color: #fff;
-    border-radius: 4px;
-    padding: 0 2px;
-    box-decoration-break: clone;
-    -webkit-box-decoration-break: clone;
+    box-shadow: 0 0 0 2px rgba(62, 166, 255, 0.30);
 }
 </style>

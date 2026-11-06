@@ -208,6 +208,39 @@ onBeforeUnmount(close);
           </button>
         </div>
       </div>
+
+      <div class="rt-setting">
+        <span class="rt-setting-label">Font size</span>
+        <div class="rt-slider">
+          <input
+            v-model.number="settings.fontSize"
+            type="range"
+            min="18"
+            max="56"
+            step="2"
+            aria-label="Font size"
+          />
+          <span class="rt-slider-value">{{ settings.fontSize }}px</span>
+        </div>
+      </div>
+
+      <div class="rt-setting">
+        <span class="rt-setting-label">Background</span>
+        <div class="rt-slider">
+          <input
+            type="range"
+            min="0"
+            max="100"
+            step="5"
+            :value="Math.round(settings.bgOpacity * 100)"
+            aria-label="Background opacity"
+            @input="settings.bgOpacity = Number(($event.target as HTMLInputElement).value) / 100"
+          />
+          <span class="rt-slider-value">{{ Math.round(settings.bgOpacity * 100) }}%</span>
+        </div>
+      </div>
+
+
     </div>
   </div>
 </template>
@@ -397,5 +430,26 @@ onBeforeUnmount(close);
 
 .rt-setting.disabled {
   opacity: 0.55;
+}
+
+.rt-slider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.rt-slider input[type="range"] {
+  flex: 1;
+  min-width: 0;
+  accent-color: #3ea6ff;
+  cursor: pointer;
+}
+
+.rt-slider-value {
+  min-width: 44px;
+  text-align: right;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
 }
 </style>

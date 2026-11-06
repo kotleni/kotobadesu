@@ -23,6 +23,8 @@ const props = defineProps<{
   lookup: LookupResult | null;
   loading: boolean;
   position?: CaptionPosition;
+  fontSize?: number;
+  bgOpacity?: number;
 }>();
 
 const emit = defineEmits<{ (e: 'close'): void }>();
@@ -45,16 +47,30 @@ const word = computed(() => {
   if (t.pos) bits.push(t.pos);
   return bits.join(' · ');
 });
+
+// Offset tracks the caption height so a larger font doesn't overlap.
+const overlayStyle = computed(() => {
+  const fs = props.fontSize ?? 32;
+  const offset = Math.round(fs * 2 + 86);
+  return props.position === 'top'
+    ? { paddingTop: offset + 'px' }
+    : { paddingBottom: offset + 'px' };
+});
+
+const cardStyle = computed(() => ({
+  backgroundColor: `rgba(33,33,33,${props.bgOpacity ?? 0.85})`,
+}));
 </script>
 
 <template>
   <div
     class="rt-lookup-overlay"
     :class="{ 'is-top': position === 'top', 'is-bottom': position !== 'top' }"
+    :style="overlayStyle"
     role="status"
     aria-label="Character lookup"
   >
-    <div class="rt-lookup-card">
+    <div class="rt-lookup-card" :style="cardStyle">
       <button type="button" class="rt-lookup-close" aria-label="Close lookup" @click="emit('close')">
         ×
       </button>
@@ -90,12 +106,10 @@ const word = computed(() => {
 
 .rt-lookup-overlay.is-bottom {
   align-items: flex-end;
-  padding-bottom: 150px;
 }
 
 .rt-lookup-overlay.is-top {
   align-items: flex-start;
-  padding-top: 150px;
 }
 
 .rt-lookup-card {
@@ -104,7 +118,6 @@ const word = computed(() => {
   max-width: 90%;
   box-sizing: border-box;
   padding: 6px 28px 6px 12px;
-  background: rgba(33, 33, 33, 0.85);
   border-radius: 4px;
   color: #fff;
   text-align: center;
