@@ -12,10 +12,14 @@ const { settings, isLoaded } = useSettings();
 const useQuerySelector = (selector: string) => {
     const elementRef = ref<HTMLElement | null>();
     const {pause, resume, isActive} = useIntervalFn(() => {
-        elementRef.value = document.querySelector<HTMLElement>(selector);
-        if (elementRef.value) {
+        const el = document.querySelector<HTMLElement>(selector);
+        if (!elementRef.value && el) {
             console.log("useQuerySelector got", selector, elementRef.value);
-            pause();
+            elementRef.value = el;
+        }
+        if (elementRef.value && !el) {
+            console.log("useQuerySelector now missing", selector, elementRef.value);
+            elementRef.value = undefined;
         }
     }, 100);
     return elementRef;
