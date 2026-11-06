@@ -38,7 +38,7 @@ onBeforeUnmount(close);
       type="button"
       class="rt-settings-toggle"
       :aria-expanded="isOpen"
-      :aria-label="isOpen ? 'Close romaji settings' : 'Open romaji settings'"
+      :aria-label="isOpen ? 'Close settings' : 'Open settings'"
       @click="toggle"
     >
       <span class="rt-settings-toggle-icon" aria-hidden="true">
@@ -57,19 +57,11 @@ onBeforeUnmount(close);
       class="rt-settings-panel"
       :class="{ open: isOpen }"
       role="dialog"
-      aria-label="Romaji settings"
+      aria-label="Settings"
       :aria-hidden="!isOpen"
     >
       <div class="rt-settings-header">
-        <span class="rt-settings-title">Romaji Settings</span>
-        <button
-          type="button"
-          class="rt-settings-close"
-          aria-label="Close settings"
-          @click="close"
-        >
-          &times;
-        </button>
+        <span class="rt-settings-title">Settings</span>
       </div>
 
       <div class="rt-setting">
@@ -140,7 +132,7 @@ onBeforeUnmount(close);
         </div>
       </div>
 
-      <div class="rt-setting" :class="{ disabled: !usesRomajiSystem }">
+      <div v-if="false" class="rt-setting" :class="{ disabled: !usesRomajiSystem }">
         <span class="rt-setting-label">Romaji system</span>
         <div class="rt-segmented">
           <button
@@ -173,7 +165,7 @@ onBeforeUnmount(close);
         </div>
       </div>
 
-      <div class="rt-setting" :class="{ disabled: !usesDelimiters }">
+      <div v-if="false" class="rt-setting" :class="{ disabled: !usesDelimiters }">
         <span class="rt-setting-label">Delimiters</span>
         <div class="rt-delims">
           <input
@@ -216,28 +208,6 @@ onBeforeUnmount(close);
           </button>
         </div>
       </div>
-
-      <div class="rt-setting">
-        <span class="rt-setting-label">Lookup</span>
-        <div class="rt-segmented">
-          <button
-            type="button"
-            class="rt-segmented-btn"
-            :class="{ active: settings.lookupEnabled === true }"
-            @click="settings.lookupEnabled = true"
-          >
-            On
-          </button>
-          <button
-            type="button"
-            class="rt-segmented-btn"
-            :class="{ active: settings.lookupEnabled === false }"
-            @click="settings.lookupEnabled = false"
-          >
-            Off
-          </button>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -256,28 +226,30 @@ onBeforeUnmount(close);
 /* Sticky toggle button pinned to the top-right corner. */
 .rt-settings-toggle {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 8px;
+  right: 8px;
   z-index: 2;
   pointer-events: auto;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   padding: 6px 10px 6px 8px;
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 999px;
-  background: rgba(17, 17, 17, 0.85);
+  background: rgba(17, 17, 17, 0.7);
   color: #fff;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   line-height: 1;
   cursor: pointer;
   backdrop-filter: blur(6px);
   transition: background 0.15s ease, transform 0.15s ease;
+  opacity: 0.3;
 }
 
 .rt-settings-toggle:hover {
-  background: rgba(60, 60, 60, 0.92);
+  background: rgba(60, 60, 60, 0.7);
+  opacity: 1;
 }
 
 .rt-settings-toggle:focus-visible {
@@ -304,8 +276,8 @@ onBeforeUnmount(close);
   max-width: calc(100vw - 16px);
   min-width: 320px;
   box-sizing: border-box;
-  padding: 20px;
-  padding-top: 60px;
+  padding: 16px;
+  padding-top: 20px;
   background: rgba(17, 17, 17, 0.94);
   color: #fff;
   border-left: 1px solid rgba(255, 255, 255, 0.12);
@@ -331,7 +303,7 @@ onBeforeUnmount(close);
 }
 
 .rt-settings-title {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
 }
 
@@ -373,7 +345,7 @@ onBeforeUnmount(close);
 
 .rt-segmented-btn {
   flex: 1;
-  padding: 10px 4px;
+  padding: 6px 2px;
   border: none;
   background: rgba(255, 255, 255, 0.08);
   color: #fff;
